@@ -1,7 +1,8 @@
-# main.tf – tells terraform which provider to use (AWS)
-
+#Configure the AWS provider
 provider "aws" {
-  region = "${var.region}"
+  region                  = var.region
+  shared_credentials_file = var.aws_credential_file_path
+  profile                 = var.aws_profile
 }
 
 #################################################
@@ -11,4 +12,3 @@ resource "aws_key_pair" "public_key" {
     key_name   = "${var.projectName}-${var.stageName}-key"
     public_key = "${file(var.publicSshKey)}"
 }
-

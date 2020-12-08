@@ -3,18 +3,18 @@
 #################################################
 # AWS Region
 variable "region" {
-	default = "us-east-2"
+	default = "us-west-1"
 }
 variable "availZones" {
 	type = "list"
-	default = ["us-east-2a", "us-east-2b", "us-east-2c"]
+	default = ["us-west-1a", "us-west-1c"]
 }
 
 #################################################
 # Project naming
 
 variable "projectName" {
-	default = "iaclab"
+	default = "puneethashi"
 }
 variable "stageName" {
 	default = "dev"
@@ -31,7 +31,7 @@ variable "webInstanceType" {
 	default = "t2.micro"
 }
 variable "publicSshKey" {
-	default = "./ssh/id_rsa.pub"
+	default = ".//ssh/id_rsa.pub"
 }
 
 # Autoscaling Group
@@ -57,15 +57,15 @@ variable "vpcCidr" {
 }
 variable "publicCidrs" {
 	type = "list"
-	default = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
+	default = ["10.0.0.0/24", "10.0.1.0/24"]
 }
 variable "appCidrs" {
 	type = "list"
-	default = ["10.0.10.0/24", "10.0.11.0/24", "10.0.12.0/24"]
+	default = ["10.0.10.0/24", "10.0.11.0/24"]
 }
 variable "databaseCidrs" {
 	type = "list"
-	default = ["10.0.20.0/24", "10.0.21.0/24", "10.0.22.0/24"]
+	default = ["10.0.20.0/24", "10.0.21.0/24"]
 }
 
 ###############################################################
@@ -82,7 +82,7 @@ variable "dbRootUser" {
 	default = "root"
 }
 variable "dbRootPass" {
-	#default = "password"
+	default = "password"
 }
 variable "dbInstanceCount" {
 	default = "1"
@@ -98,16 +98,52 @@ variable "dbBackupRetention" {
 # Data Lookups
 data "aws_ami" "awsLinux2Ami" {
 	most_recent = true
+	owners      = ["amazon"]
 	filter {
 		name = "owner-alias"
 		values = ["amazon"]
 	}
+	
 	filter {
 		name = "name"
-		values = ["amzn2-ami-*-x86_64-gp2"]
+		values = ["amzn2-ami-hvm-*-x86_64-ebs"]
 	}
 	filter {
 		name = "virtualization-type"
 		values = ["hvm"]
 	}
+}
+
+
+variable "name_prefix" {
+  type = string
+}
+
+variable "name_suffix" {
+  type = string
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "approval" {
+  type = string
+}
+
+variable "aws_account" {
+  type = string
+}
+
+variable "subscriptions" {
+  description = "List of telephone numbers to subscribe to SNS."
+  type        = list(string)
+}
+
+variable "aws_credential_file_path" {
+  type = string
+}
+
+variable "aws_profile" {
+  type = string
 }

@@ -10,8 +10,8 @@ VARS="
 	VAULT_IP 
 	WEB_PROFILE_ARN" 
 
-TFDIR=~/iac_lab/terraform
-VAULTDIR=~/iac_lab/vault
+TFDIR="/c/Users/plakhanp/Documents/git/codepipeline-aws-hashi-vault/terraform"
+VAULTDIR="/c/Users/plakhanp/Documents/git/codepipeline-aws-hashi-vault/vault"
 OUTFILE=${VAULTDIR}/bastion.profile
 
 cd $TFDIR

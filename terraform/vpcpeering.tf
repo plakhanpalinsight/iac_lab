@@ -1,5 +1,7 @@
 # vpcpeering.tf - vpc peering connection between default VPC and app vpc for bastion host access
-
+terraform {
+  required_version  = ">= 0.12"
+}
 ###############################################################
 # Queries
 
@@ -23,9 +25,9 @@ resource "aws_vpc_peering_connection" "vpx" {
     vpc_id        = "${aws_vpc.vpc.id}"
     auto_accept   = true
 
-    tags {
+    tags = {
         Name = "VPC Peering default VPC and the ${var.projectName}-${var.stageName}-vpc"
-        Project     = "${var.projectName}",
+        Project     = "${var.projectName}"
         Stage       = "${var.stageName}"
         CostCenter  = "${var.costCenter}"
     }   

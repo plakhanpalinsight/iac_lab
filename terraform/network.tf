@@ -1,5 +1,7 @@
 # network.tf – creates VPC, subnets, route tables, internet gateways and nat gateways
-
+terraform {
+  required_version  = ">= 0.12"
+}
 ###############################################################
 # VPC
 
@@ -7,9 +9,9 @@
 resource "aws_vpc" "vpc" {
 	cidr_block = "${var.vpcCidr}"
 	enable_dns_hostnames = true
-	tags {
-		Name    = "${var.projectName}-${var.stageName}-vpc",
-		Project = "${var.projectName}",
+	tags = {
+		Name    = "${var.projectName}-${var.stageName}-vpc"
+		Project = "${var.projectName}"
 		Stage   = "${var.stageName}"
 		CostCenter = "${var.costCenter}"
 	}
@@ -18,9 +20,9 @@ resource "aws_vpc" "vpc" {
 # Create an Internet Gateway for the public subnets
 resource "aws_internet_gateway" "igw" {
 	vpc_id = "${aws_vpc.vpc.id}"
-	tags {
-		Name    = "${var.projectName}-${var.stageName}-igw",
-		Project = "${var.projectName}",
+	tags = {
+		Name    = "${var.projectName}-${var.stageName}-igw"
+		Project = "${var.projectName}"
 		Stage   = "${var.stageName}"
 		CostCenter = "${var.costCenter}"
 	}
@@ -36,9 +38,9 @@ resource "aws_subnet" "public_subnet" {
 	cidr_block = "${element(var.publicCidrs, count.index)}"
 	availability_zone = "${element(var.availZones, count.index)}"
 	map_public_ip_on_launch = true
-	tags {
+	tags = {
 		Name = "${var.projectName}-${var.stageName}-public-${element(var.availZones, count.index)}-sn"
-		Project = "${var.projectName}",
+		Project = "${var.projectName}"
 		Stage   = "${var.stageName}"
 		CostCenter = "${var.costCenter}"
   }
@@ -47,9 +49,9 @@ resource "aws_subnet" "public_subnet" {
 # Create a singe route table for all the public subnets
 resource "aws_route_table" "publicRouteTable" {
 	vpc_id = "${aws_vpc.vpc.id}"
-	tags {
+	tags = {
 		Name = "${var.projectName}-${var.stageName}-public-routeTable"
-		Project = "${var.projectName}",
+		Project = "${var.projectName}"
 		Stage   = "${var.stageName}"
 		CostCenter = "${var.costCenter}"
 	}
@@ -81,9 +83,9 @@ resource "aws_nat_gateway" "natGw" {
 	count         = "${length(var.publicCidrs)}"
 	allocation_id = "${element(aws_eip.natEip.*.id, count.index)}"
 	subnet_id     = "${element(aws_subnet.public_subnet.*.id, count.index)}"
-	tags {
+	tags = {
 		Name = "${var.projectName}-${var.stageName}-${element(var.availZones, count.index)}-natgw"
-		Project = "${var.projectName}",
+		Project = "${var.projectName}"
 		Stage   = "${var.stageName}"
 		CostCenter = "${var.costCenter}"
   }
@@ -98,9 +100,9 @@ resource "aws_subnet" "app_subnet" {
 	vpc_id  = "${aws_vpc.vpc.id}"
 	cidr_block = "${element(var.appCidrs, count.index)}"
 	availability_zone = "${element(var.availZones, count.index)}"
-	tags {
+	tags = {
 		Name = "${var.projectName}-${var.stageName}-private-${element(var.availZones, count.index)}-sn"
-		Project = "${var.projectName}",
+		Project = "${var.projectName}"
 		Stage   = "${var.stageName}"
 		CostCenter = "${var.costCenter}"
   }
@@ -123,9 +125,9 @@ resource "aws_subnet" "database_subnet" {
 	vpc_id  = "${aws_vpc.vpc.id}"
 	cidr_block = "${element(var.databaseCidrs, count.index)}"
 	availability_zone = "${element(var.availZones, count.index)}"
-	tags {
+	tags = {
 		Name = "${var.projectName}-${var.stageName}-database-${element(var.availZones, count.index)}-sn"
-		Project = "${var.projectName}",
+		Project = "${var.projectName}"
 		Stage   = "${var.stageName}"
 		CostCenter = "${var.costCenter}"
   }
@@ -145,9 +147,9 @@ resource "aws_route_table_association" "databaseRteTblAssoc" {
 resource "aws_route_table" "privateRouteTable" {
 	count	= "${length(var.availZones)}"
 	vpc_id = "${aws_vpc.vpc.id}"
-	tags {
+	tags = {
 		Name = "${var.projectName}-${var.stageName}-private-${element(var.availZones, count.index)}-routeTable"
-		Project = "${var.projectName}",
+		Project = "${var.projectName}"
 		Stage   = "${var.stageName}"
 		CostCenter = "${var.costCenter}"
 	}

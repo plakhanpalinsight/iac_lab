@@ -1,2 +1,0 @@
-# Delete an instance id from vault (allowing re-authentication
-vault delete auth/aws-ec2/identity-whitelist/INSTANCE_ID   

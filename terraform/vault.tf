@@ -1,5 +1,7 @@
 # vault.tf - creates a vault server in the app layer subnet
-
+terraform {
+  required_version  = ">= 0.12"
+}
 
 #################################################
 # Vault Host
@@ -18,9 +20,9 @@ resource "aws_instance" "vault" {
 	vpc_security_group_ids	= ["${aws_security_group.vault_sg.id}"]
 	user_data		= "${file("vaultuserdata.sh")}"
 
-	tags {
+	tags = {
 		Name        = "${var.projectName}-${var.stageName}-vault"
-		Project     = "${var.projectName}",
+		Project     = "${var.projectName}"
 		Stage       = "${var.stageName}"
 		CostCenter  = "${var.costCenter}"
 	}
@@ -33,9 +35,9 @@ resource "aws_instance" "vault" {
 resource "aws_security_group" "vault_sg" {
     name = "${var.projectName}-${var.stageName}-vault-sg"
     vpc_id = "${aws_vpc.vpc.id}"
-    tags {
+    tags = {
         Name        = "${var.projectName}-${var.stageName}-vault-sg"
-        Project     = "${var.projectName}",
+        Project     = "${var.projectName}"
         Stage       = "${var.stageName}"
         CostCenter  = "${var.costCenter}"
     }
@@ -47,7 +49,7 @@ resource "aws_security_group_rule" "vault_sg_80in" {
     from_port       = 8200
     to_port         = 8200
     protocol        = "tcp"
-    cidr_blocks     = ["${var.appCidrs}"]
+    cidr_blocks     = var.appCidrs
     security_group_id = "${aws_security_group.vault_sg.id}"
 }
 

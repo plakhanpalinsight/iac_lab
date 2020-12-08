@@ -1,5 +1,7 @@
 # web.tf – builds load balancer, auto scaling groups, launch configs & web security groups
-
+terraform {
+  required_version  = ">= 0.12"
+}
 
 #################################################
 # Web Load Balancer
@@ -9,9 +11,9 @@ resource "aws_alb" "alb" {
 	name			= "${var.projectName}-${var.stageName}-alb"
 	internal		= false
 	security_groups	= ["${aws_security_group.alb_sg.id}"]
-	subnets			= ["${aws_subnet.public_subnet.*.id}"]
-	tags {
-		Project		= "${var.projectName}",
+	subnets			= aws_subnet.public_subnet.*.id
+	tags = {
+		Project		= "${var.projectName}"
 		Stage		= "${var.stageName}"
 		CostCenter	= "${var.costCenter}"
 	}
@@ -23,9 +25,9 @@ resource "aws_lb_target_group" "alb_tg" {
 	port					= 8000
 	protocol		= "HTTP"
 	vpc_id			= "${aws_vpc.vpc.id}"
-	tags {
+	tags = {
 		Name		= "${var.projectName}-${var.stageName}-tg"
-		Project		= "${var.projectName}",
+		Project		= "${var.projectName}"
 		Stage		= "${var.stageName}"
 		CostCenter	= "${var.costCenter}"
 	}
@@ -66,9 +68,9 @@ resource "aws_security_group" "alb_sg" {
 	    protocol	= "-1"
 	    cidr_blocks = ["0.0.0.0/0"]
     }
-	tags {
+	tags = {
 		Name		= "${var.projectName}-${var.stageName}-alb-sg"
-		Project		= "${var.projectName}",
+		Project		= "${var.projectName}"
 		Stage		= "${var.stageName}"
 		CostCenter	= "${var.costCenter}"
 	}
@@ -94,7 +96,7 @@ resource "aws_launch_configuration" "web_lc" {
 # Create an autoscaling group
 resource "aws_autoscaling_group" "web_asg" {
 	name                 = "${var.projectName}-${var.stageName}-web-asg"
-	vpc_zone_identifier  = ["${aws_subnet.app_subnet.*.id}"]
+	vpc_zone_identifier  = aws_subnet.app_subnet.*.id
 	launch_configuration = "${aws_launch_configuration.web_lc.name}"
 	target_group_arns	 = ["${aws_lb_target_group.alb_tg.arn}"]
 	min_size             = "${var.tgtGrpMinSize}"
@@ -155,7 +157,7 @@ resource "aws_cloudwatch_metric_alarm" "bat" {
 	statistic           = "Average"
 	threshold           = "80"
 
-	dimensions {
+	dimensions = {
 		AutoScalingGroupName = "${aws_autoscaling_group.web_asg.name}"
 	}
 
@@ -230,9 +232,9 @@ resource "aws_iam_instance_profile" "web_profile" {
 resource "aws_security_group" "web_sg" {
 	name = "${var.projectName}-${var.stageName}-web-sg"
 	vpc_id = "${aws_vpc.vpc.id}"
-	tags {
+	tags = {
 		Name		= "${var.projectName}-${var.stageName}-web-sg"
-		Project		= "${var.projectName}",
+		Project		= "${var.projectName}"
 		Stage		= "${var.stageName}"
 		CostCenter	= "${var.costCenter}"
 	}
@@ -244,7 +246,7 @@ resource "aws_security_group_rule" "web_sg_8000in" {
 	from_port       = 8000 
 	to_port         = 8000
 	protocol        = "tcp"
-	cidr_blocks		= ["${var.publicCidrs}"]
+	cidr_blocks		= var.publicCidrs
 	security_group_id = "${aws_security_group.web_sg.id}"
 }
 

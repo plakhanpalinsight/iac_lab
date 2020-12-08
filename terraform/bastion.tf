@@ -1,4 +1,7 @@
 # bastion.tf - creates a bastion host in the default subnet with access to resources
+terraform {
+  required_version  = ">= 0.12"
+}
 
 ###############################################################
 # Queries
@@ -20,13 +23,13 @@ data "aws_subnet_ids" "default_subnets" {
 resource "aws_instance" "bastion" {
    ami             = "${data.aws_ami.awsLinux2Ami.id}"
    instance_type   = "t2.micro"
-   subnet_id       = "${data.aws_subnet_ids.default_subnets.ids[0]}"
+   subnet_id       = "${element(tolist(data.aws_subnet_ids.default_subnets.ids),0)}"
    key_name        = "${aws_key_pair.public_key.key_name}"
    vpc_security_group_ids = ["${aws_security_group.bastion_sg.id}"]
 
-   tags {
+   tags = {
        Name        = "${var.projectName}-${var.stageName}-bastion"
-       Project     = "${var.projectName}",
+       Project     = "${var.projectName}"
        Stage       = "${var.stageName}"
        CostCenter  = "${var.costCenter}"
    }
@@ -48,9 +51,9 @@ resource "aws_security_group" "bastion_sg" {
        protocol    = "-1"
        cidr_blocks = ["0.0.0.0/0"]
     }
-   tags {
+   tags = {
        Name        = "${var.projectName}-${var.stageName}-bastion-sg"
-       Project     = "${var.projectName}",
+       Project     = "${var.projectName}"
        Stage       = "${var.stageName}"
        CostCenter  = "${var.costCenter}"
    }

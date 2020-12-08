@@ -1,10 +1,13 @@
 # database.tf - creates an RDS aurora cluster and instances
+terraform {
+  required_version  = ">= 0.12"
+}
 
 # Create the database cluster
 resource "aws_rds_cluster" "rds_cluster" {
 	engine					= "aurora"
 	cluster_identifier_prefix = "${var.projectName}-${var.stageName}-rds-cluster-"
-	availability_zones      = ["${var.availZones}"]
+	availability_zones      = var.availZones
 	database_name           = "${var.projectName}${var.stageName}db"
 	master_username         = "${var.dbRootUser}"
 	master_password         = "${var.dbRootPass}"
@@ -14,7 +17,7 @@ resource "aws_rds_cluster" "rds_cluster" {
 	storage_encrypted		= "true"
 	skip_final_snapshot 	= "true"
 	db_cluster_parameter_group_name = "${aws_rds_cluster_parameter_group.rds_pg.name}"
-	tags {
+	tags = {
         Project     = "${var.projectName}"
         Stage       = "${var.stageName}"
         CostCenter  = "${var.costCenter}"
@@ -26,7 +29,7 @@ resource "aws_rds_cluster_instance" "rds_cluster_inst" {
 	identifier         = "${var.projectName}-${var.stageName}-rds-${count.index}"
 	cluster_identifier = "${aws_rds_cluster.rds_cluster.id}"
 	instance_class     = "${var.dbInstanceType}"
-	tags {
+	tags = {
         Project     = "${var.projectName}"
         Stage       = "${var.stageName}"
         CostCenter  = "${var.costCenter}"
@@ -36,8 +39,8 @@ resource "aws_rds_cluster_instance" "rds_cluster_inst" {
 
 resource "aws_db_subnet_group" "rds_subnet_group" {
 	name       = "${var.projectName}-${var.stageName}-rds-subnet-grp"
-	subnet_ids = ["${aws_subnet.database_subnet.*.id}"]
-	tags {
+	subnet_ids = aws_subnet.database_subnet.*.id
+	tags = {
 		Name		= "${var.projectName}-${var.stageName}-rds-subnet_grp"
         Project     = "${var.projectName}"
         Stage       = "${var.stageName}"
@@ -63,9 +66,9 @@ resource "aws_rds_cluster_parameter_group" "rds_pg" {
 resource "aws_security_group" "db_sg" {
     name = "${var.projectName}-${var.stageName}-db-sg"
     vpc_id = "${aws_vpc.vpc.id}"
-    tags {
+    tags = {
         Name        = "${var.projectName}-${var.stageName}-db-sg"
-        Project     = "${var.projectName}",
+        Project     = "${var.projectName}"
         Stage       = "${var.stageName}"
         CostCenter  = "${var.costCenter}"
     }
@@ -77,7 +80,7 @@ resource "aws_security_group_rule" "db_sg_3306in" {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    cidr_blocks     = ["${var.appCidrs}"]
+    cidr_blocks     = var.appCidrs
     security_group_id = "${aws_security_group.db_sg.id}"
 }
 
